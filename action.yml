@@ -1,0 +1,13 @@
+name: 'Call a JS file'
+description: 'Call a JS file from a GitHub Action'
+inputs:
+  who-to-greet:  # id of input
+    description: 'What to call'
+    required: true
+    default: 'HelloWorld'
+outputs:
+  time: # id of output
+    description: 'The time the JS file was called'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
