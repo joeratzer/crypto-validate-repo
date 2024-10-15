@@ -39,7 +39,7 @@ const main = async () => {
         });
       } 
       else {
-        let jsonResponse = response.json();
+        let jsonResponse = await response.json();
         let text = JSON.stringify(jsonResponse);
         console.log(`Pull Request created. API response: `);
         octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
