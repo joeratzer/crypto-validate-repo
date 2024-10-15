@@ -43,7 +43,7 @@ const main = async () => {
         let text = JSON.stringify(jsonResponse);
         console.log(`Pull Request created. API response: `);
         octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
-          body: `Pull Request #${pr_number} created. API ${text}`
+          body: `Pull Request #${pr_number} created. API response: ${text}`
         });
       }
     })
