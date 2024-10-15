@@ -11,37 +11,42 @@ const github = require('@actions/github');
  **/
 const octokit = new github.getOctokit(token);
 
-try {
+const main = async () => {
 
-  const whatToCall = core.getInput('what-to-call');
-  console.log(`Calling: ${whatToCall}!`);
-  
-  const time = (new Date()).toTimeString();
-  const owner = core.getInput('owner', { required: true });
-  const repo = core.getInput('repo', { required: true });
-  const pr_number = core.getInput('pr_number', { required: true });
+  try {
 
-  core.setOutput("time", time);
-  // Get the JSON webhook payload for the event that triggered the workflow
-  const payload = JSON.stringify(github.context.payload, undefined, 2)
-  console.log(`The event payload: ${payload}`);
+    const whatToCall = core.getInput('what-to-call');
+    console.log(`Calling: ${whatToCall}!`);
+    
+    const time = (new Date()).toTimeString();
+    const owner = core.getInput('owner', { required: true });
+    const repo = core.getInput('repo', { required: true });
+    const pr_number = core.getInput('pr_number', { required: true });
 
-  /**
-   * Create a comment on the PR with the information we compiled from the
-   * list of changed files.
-   */
-  await octokit.rest.issues.createComment({
-    owner,
-    repo,
-    issue_number: pr_number,
-    body: `
-      Pull Request #${pr_number} has been updated with: \n
-      - ${diffData.changes} changes \n
-      - ${diffData.additions} additions \n
-      - ${diffData.deletions} deletions \n
-    `
-  });
-  
-} catch (error) {
-  core.setFailed(error.message);
+    core.setOutput("time", time);
+    // Get the JSON webhook payload for the event that triggered the workflow
+    const payload = JSON.stringify(github.context.payload, undefined, 2)
+    console.log(`The event payload: ${payload}`);
+
+    /**
+     * Create a comment on the PR with the information we compiled from the
+     * list of changed files.
+     */
+    await octokit.rest.issues.createComment({
+      owner,
+      repo,
+      issue_number: pr_number,
+      body: `
+        Pull Request #${pr_number} has been updated with: \n
+        - ${diffData.changes} changes \n
+        - ${diffData.additions} additions \n
+        - ${diffData.deletions} deletions \n
+      `
+    });
+    
+  } catch (error) {
+    core.setFailed(error.message);
+  }
 }
+
+main();
