@@ -31,17 +31,14 @@ const main = async () => {
     const apiUrl = 'https://restful-booker.herokuapp.com/booking/1';
 
     // Make a GET request
-    fetch(apiUrl).then(response => {
+    await fetch(apiUrl).then(async response => {
       if (!response.ok) {
         console.error('Network response was not ok');
-
-        octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
-          body: `Pull Request #${pr_number} created. But API call failed}`
-        });
+      } 
+      else {
+        var jsonResponse = response.json();
+        console.log(`Pull Request created. API response: ${JSON.stringify(jsonResponse)}`);
       }
-      octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
-        body: `Pull Request #${pr_number} created. API response: ${response.json()}`
-      });
     })
     .catch(error => {
       console.error('Error:', error);
