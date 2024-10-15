@@ -31849,28 +31849,20 @@ const main = async () => {
     fetch(apiUrl).then(response => {
       if (!response.ok) {
         console.error('Network response was not ok');
+
+        octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
+          body: `Pull Request #${pr_number} created. But API call failed}`
+        });
       }
-      apiResponse = response.json();
+      octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
+        body: `Pull Request #${pr_number} created. API response: ${response.json()}`
+      });
     })
     .then(data => {
       console.log(data);
     })
     .catch(error => {
       console.error('Error:', error);
-    });
-
-    /**
-     * Create a comment on the PR with the information we compiled from the
-     * list of changed files.
-     */
-    await octokit.rest.issues.createComment({
-      owner,
-      repo,
-      issue_number: pr_number,
-      body: `Pull Request #${pr_number} has been created. Payload: \n
-        - ${payload} \n
-        - API response \n
-        - ${apiResponse}`
     });
     
   } catch (error) {
