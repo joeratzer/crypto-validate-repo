@@ -31847,14 +31847,24 @@ const main = async () => {
     await fetch(apiUrl).then(async response => {
       if (!response.ok) {
         console.error('Network response was not ok');
+        octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
+          body: `Pull Request #${pr_number} created. But API call failed`
+        });
       } 
       else {
-        var jsonResponse = response.json();
-        console.log(`Pull Request created. API response: ${JSON.stringify(jsonResponse)}`);
+        let jsonResponse = response.json();
+        let text = JSON.stringify(jsonResponse);
+        console.log(`Pull Request created. API response: `);
+        octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
+          body: `Pull Request #${pr_number} created. API ${text}`
+        });
       }
     })
     .catch(error => {
       console.error('Error:', error);
+      octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
+        body: `Pull Request #${pr_number} created. But API call failed`
+      });
     });
     
   } catch (error) {
