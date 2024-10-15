@@ -6,7 +6,6 @@ const main = async () => {
   try {
 
     const whatToCall = core.getInput('what-to-call');
-    console.log(`Calling: ${whatToCall}!`);
     
     const time = (new Date()).toTimeString();
     const owner = core.getInput('owner', { required: true });
@@ -27,11 +26,10 @@ const main = async () => {
     core.setOutput("time", time);
     // Get the JSON webhook payload for the event that triggered the workflow
     const payload = JSON.stringify(github.context.payload, undefined, 2)
-    console.log(`The event payload: ${payload}`);
+    //console.log(`The event payload: ${payload}`);
 
     const apiUrl = 'https://restful-booker.herokuapp.com/booking/1';
 
-    let apiResponse = '';
     // Make a GET request
     fetch(apiUrl).then(response => {
       if (!response.ok) {
@@ -44,9 +42,6 @@ const main = async () => {
       octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
         body: `Pull Request #${pr_number} created. API response: ${response.json()}`
       });
-    })
-    .then(data => {
-      console.log(data);
     })
     .catch(error => {
       console.error('Error:', error);
