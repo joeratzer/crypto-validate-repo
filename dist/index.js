@@ -31842,6 +31842,23 @@ const main = async () => {
     const payload = JSON.stringify(github.context.payload, undefined, 2)
     console.log(`The event payload: ${payload}`);
 
+    const apiUrl = 'https://restful-booker.herokuapp.com/booking/1';
+
+    let apiResponse = '';
+    // Make a GET request
+    fetch(apiUrl).then(response => {
+      if (!response.ok) {
+        console.error('Network response was not ok');
+      }
+      apiResponse = response.json();
+    })
+    .then(data => {
+      console.log(data);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+
     /**
      * Create a comment on the PR with the information we compiled from the
      * list of changed files.
@@ -31850,12 +31867,10 @@ const main = async () => {
       owner,
       repo,
       issue_number: pr_number,
-      body: `
-        Pull Request #${pr_number} has been updated with: \n
-        - ${diffData.changes} changes \n
-        - ${diffData.additions} additions \n
-        - ${diffData.deletions} deletions \n
-      `
+      body: `Pull Request #${pr_number} has been created. Payload: \n
+        - ${payload} \n
+        - API response \n
+        - ${apiResponse}`
     });
     
   } catch (error) {
