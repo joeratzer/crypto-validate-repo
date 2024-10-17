@@ -31823,7 +31823,7 @@ const getQuantumResistantDetails = (isQuantumResistant, result) => {
 }
 
 const isQuantumResistant = (apiResponseJson) => {
-  if (!apiResponseJson)
+  if (!apiResponseJson || !Array.isArray(apiResponseJson))
     return false;
 
   return !apiResponseJson.find(r => r.resistant === false);
@@ -31872,7 +31872,11 @@ const main = async () => {
   }
 }
 
-main();
+//main();
+
+
+var r = isQuantumResistant([{ resistant: false}, {resistant: true}]);
+console.log(r);
 module.exports = __webpack_exports__;
 /******/ })()
 ;
