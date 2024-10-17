@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 
 const getQuantumResistantDetails = (isQuantumResistant, result) => {
+
   return {
     isQuantumResistant: isQuantumResistant,
     details: result,
@@ -10,6 +11,7 @@ const getQuantumResistantDetails = (isQuantumResistant, result) => {
 }
 
 const isQuantumResistant = (apiResponseJson) => {
+
   if (!apiResponseJson || !Array.isArray(apiResponseJson))
     return false;
 
@@ -17,6 +19,7 @@ const isQuantumResistant = (apiResponseJson) => {
 }
 
 const processApiResponse = async (response, owner, repo, prNumber, octokit) => {
+  
   if (!response.ok) {
     const apiFailedText = 'API call failed';
     octokit.rest.issues.createComment({owner, repo, issue_number: prNumber, prNumber,
@@ -38,17 +41,23 @@ const processApiResponse = async (response, owner, repo, prNumber, octokit) => {
 }
 
 const main = async () => {
+
   try {
-    
     const owner = core.getInput('owner', { required: true });
     const repo = core.getInput('repo', { required: true });
-    const prNumber = core.getInput('pr_number', { required: true });
+    const prNumber = core.getInput('prNumber', { required: true });
     const token = core.getInput('token', { required: true });
     const validationUrl = core.getInput('validationUrl', { required: true });
 
     const octokit = new github.getOctokit(token);
 
-    await fetch(validationUrl).then(async response => {
+    const requestOptions = {
+      method: 'GET',
+      headers: { 'Content-Type' : 'application/json' },
+      body: ''
+    };
+
+    await fetch(validationUrl, requestOptions).then(async response => {
       await processApiResponse(response, owner, repo, prNumber, octokit);
     })
     .catch(error => {
