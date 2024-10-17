@@ -39,11 +39,11 @@ const main = async () => {
         let apiResponseJson = await response.json();
 
         const quantumResistant = isQuantumResistant(apiResponseJson);
-        let details = getQuantumResistantDetails(quantumResistant, JSON.stringify(apiResponseJson));
-        let response = JSON.stringify(details);
+        const details = getQuantumResistantDetails(quantumResistant, JSON.stringify(apiResponseJson));
+        const fullResponse = JSON.stringify(details);
 
         octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
-          body: `Pull Request #${pr_number} created. API response: ${response}`
+          body: `Pull Request #${pr_number} created. API response: ${fullResponse}`
         });
       }
     })
