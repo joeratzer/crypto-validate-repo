@@ -16,7 +16,7 @@ const isQuantumResistant = (apiResponseJson) => {
   return !apiResponseJson.find(r => r.resistant === false);
 }
 
-const processApiResponse = async (response, owner, repo, prNumber) => {
+const processApiResponse = async (response, owner, repo, prNumber, octokit) => {
   if (!response.ok) {
     const apiFailedText = 'API call failed';
     octokit.rest.issues.createComment({owner, repo, issue_number: prNumber, prNumber,
@@ -49,7 +49,7 @@ const main = async () => {
     const octokit = new github.getOctokit(token);
 
     await fetch(validationUrl).then(async response => {
-      await processApiResponse(response, owner, repo, prNumber);
+      await processApiResponse(response, owner, repo, prNumber, octokit);
     })
     .catch(error => {
       core.setFailed(error.message);
