@@ -1,25 +1,38 @@
-# js-call-in-action
+# crypto-validate-repo
 
-# Call JS from an Action
-
-This action prints "Action called:" + the name of a thing being called to the log.
+Crypto-validate another repo, by calling this as an Action.
 
 ## Inputs
 
-### `what-to-call`
+### `validationUrl`
 
-**Required** The name of the thing being called. Default `"HelloWorld"`.
+**Required** The API that does the validation.
 
 ## Outputs
 
-### `time`
-
-The time we greeted you.
+A PR comment will be added. The comment will state whether the repo is valid or not.
 
 ## Example usage
 
 ```yaml
-uses: actions/js-call-in-action@e76147da8e5c81eaf017dede5645551d4b94427b
-with:
-  what-to-call: 'Hello World'
+name: Validate a repo
+
+on: 
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  annotate-pr:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    name: Annotates pull request with validation result
+    steps:
+      - name: Crypto Validate PR
+        uses: joeratzer/js-call-in-action@main
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          prNumber: ${{ github.event.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          validationUrl: 'YOUR-VALIDATION-API'
 ```
