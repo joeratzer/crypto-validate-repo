@@ -31869,14 +31869,12 @@ const main = async () => {
     
   } catch (error) {
     core.setFailed(error.message);
+    core.error(`Error: ${error}. Message: ${error.message}`);
   }
 }
 
-//main();
+main();
 
-
-var r = isQuantumResistant([{ resistant: false}, {resistant: true}]);
-console.log(r);
 module.exports = __webpack_exports__;
 /******/ })()
 ;

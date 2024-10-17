@@ -56,6 +56,7 @@ const main = async () => {
     
   } catch (error) {
     core.setFailed(error.message);
+    core.error(`Error: ${error}. Message: ${error.message}`);
   }
 }
 
