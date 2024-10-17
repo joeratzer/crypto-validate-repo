@@ -31814,35 +31814,34 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(4557);
 const github = __nccwpck_require__(6177);
 
+const getQuantumResistantDetails = async (isQuantumResistant, result) => {
+  return {
+    isQuantumResistant: isQuantumResistant,
+    details: result,
+    title: `The repo is ${isQuantumResistant ? '' : 'not'} quantum-resistant`
+  }
+}
+
+const isQuantumResistant = async (apiResponseJson) => {
+  if (!apiResponseJson)
+    return false;
+
+  return !apiResponseJson.find(r => r.resistant === false);
+}
+
 const main = async () => {
 
   try {
-
-    const whatToCall = core.getInput('what-to-call');
     
-    const time = (new Date()).toTimeString();
     const owner = core.getInput('owner', { required: true });
     const repo = core.getInput('repo', { required: true });
     const pr_number = core.getInput('pr_number', { required: true });
     const token = core.getInput('token', { required: true });
+    const validationUrl = core.getInput('validationUrl', { required: true });
 
-    /**
-     * Now we need to create an instance of Octokit which will use to call
-     * GitHub's REST API endpoints.
-     * We will pass the token as an argument to the constructor. This token
-     * will be used to authenticate our requests.
-     * You can find all the information about how to use Octokit here:
-     * https://octokit.github.io/rest.js/v18
-     **/
     const octokit = new github.getOctokit(token);
 
-    core.setOutput("time", time);
-    // Get the JSON webhook payload for the event that triggered the workflow
-    const payload = JSON.stringify(github.context.payload, undefined, 2)
-    const apiUrl = 'https://restful-booker.herokuapp.com/booking/1';
-
-    // Make a GET request
-    await fetch(apiUrl).then(async response => {
+    await fetch(validationUrl).then(async response => {
       if (!response.ok) {
         console.error('Network response was not ok');
         octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
@@ -31850,16 +31849,14 @@ const main = async () => {
         });
       } 
       else {
-        let jsonResponse = await response.json();
+        let apiResponseJson = await response.json();
 
-        let nonResistantAlgo = isNotQuantumResistant(jsonResponse);
-        let text = JSON.stringify(jsonResponse);
-        let details = getDetails(nonResistantAlgo, text);
-        let outputAsText = JSON.stringify(details);
-        
-        console.log(`Pull Request created. API response: `);
+        const quantumResistant = await isQuantumResistant(apiResponseJson);
+        let details = await getQuantumResistantDetails(quantumResistant, JSON.stringify(apiResponseJson));
+        details = JSON.stringify(details);
+
         octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
-          body: `Pull Request #${pr_number} created. API response: ${outputAsText}`
+          body: `Pull Request #${pr_number} created. API response: ${details}`
         });
       }
     })
@@ -31873,21 +31870,6 @@ const main = async () => {
   } catch (error) {
     core.setFailed(error.message);
   }
-}
-
-const getDetails = async (nonResistantAlgo, result) => {
-  return {
-    quantumStatus: nonResistantAlgo,
-    details: result,
-    title: `The repo is ${nonResistantAlgo ? 'not ' : ''} quantum-resistant.`
-  }
-}
-
-const isNotQuantumResistant = async (jsonResponse) => {
-  if (!jsonResponse)
-    return false;
-
-  return jsonResponse.find(r => r.resistant === false);
 }
 
 main();
