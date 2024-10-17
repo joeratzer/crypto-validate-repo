@@ -13,13 +13,9 @@ inputs:
   token:
     description: 'The token to use to access the GitHub API'
     required: true
-  what-to-call:  # id of input
-    description: 'What to call'
+  validationUrl:  
+    description: 'Url to validate repo'
     required: true
-    default: 'HelloWorld'
-outputs:
-  time: # id of output
-    description: 'The time the JS file was called'
 runs:
   using: 'node20'
   main: 'dist/index.js'
