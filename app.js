@@ -1,8 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
-const testBody = '{"firstname" : "Jim","lastname" : "Smith", "totalprice" : 111,"depositpaid" : true,"bookingdates" : {"checkin" : "2018-01-01", "checkout" : "2019-01-01" },"additionalneeds" : "Breakfast"}';
-
 const getQuantumResistantDetails = (isQuantumResistant, result) => {
 
   return {
@@ -52,6 +50,9 @@ const main = async () => {
     const validationUrl = core.getInput('validationUrl', { required: true });
 
     const octokit = new github.getOctokit(token);
+
+    // TODO: replace with actual analysis results
+    const testBody = '{"firstname" : "Jim","lastname" : "Smith", "totalprice" : 111,"depositpaid" : true,"bookingdates" : {"checkin" : "2018-01-01", "checkout" : "2019-01-01" },"additionalneeds" : "Breakfast"}';
 
     const requestOptions = {
       method: 'POST',
