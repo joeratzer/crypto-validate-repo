@@ -31839,8 +31839,6 @@ const main = async () => {
     core.setOutput("time", time);
     // Get the JSON webhook payload for the event that triggered the workflow
     const payload = JSON.stringify(github.context.payload, undefined, 2)
-    //console.log(`The event payload: ${payload}`);
-
     const apiUrl = 'https://restful-booker.herokuapp.com/booking/1';
 
     // Make a GET request
@@ -31853,10 +31851,15 @@ const main = async () => {
       } 
       else {
         let jsonResponse = await response.json();
+
+        let nonResistantAlgo = isNotQuantumResistant(jsonResponse);
         let text = JSON.stringify(jsonResponse);
+        let details = getDetails(nonResistantAlgo, text);
+        let outputAsText = JSON.stringify(details);
+        
         console.log(`Pull Request created. API response: `);
         octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
-          body: `Pull Request #${pr_number} created. API response: ${text}`
+          body: `Pull Request #${pr_number} created. API response: ${outputAsText}`
         });
       }
     })
@@ -31870,6 +31873,21 @@ const main = async () => {
   } catch (error) {
     core.setFailed(error.message);
   }
+}
+
+const getDetails = async (nonResistantAlgo, result) => {
+  return {
+    quantumStatus: nonResistantAlgo,
+    details: result,
+    title: `The repo is ${nonResistantAlgo ? 'not ' : ''} quantum-resistant.`
+  }
+}
+
+const isNotQuantumResistant = async (jsonResponse) => {
+  if (!jsonResponse)
+    return false;
+
+  return jsonResponse.find(r => r.resistant === false);
 }
 
 main();

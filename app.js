@@ -1,37 +1,34 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
+const getQuantumResistantDetails = async (isQuantumResistant, result) => {
+  return {
+    isQuantumResistant: isQuantumResistant,
+    details: result,
+    title: `The repo is ${isQuantumResistant ? '' : 'not'} quantum-resistant`
+  }
+}
+
+const isQuantumResistant = async (apiResponseJson) => {
+  if (!apiResponseJson)
+    return false;
+
+  return !apiResponseJson.find(r => r.resistant === false);
+}
+
 const main = async () => {
 
   try {
-
-    const whatToCall = core.getInput('what-to-call');
     
-    const time = (new Date()).toTimeString();
     const owner = core.getInput('owner', { required: true });
     const repo = core.getInput('repo', { required: true });
     const pr_number = core.getInput('pr_number', { required: true });
     const token = core.getInput('token', { required: true });
+    const validationUrl = core.getInput('validationUrl', { required: true });
 
-    /**
-     * Now we need to create an instance of Octokit which will use to call
-     * GitHub's REST API endpoints.
-     * We will pass the token as an argument to the constructor. This token
-     * will be used to authenticate our requests.
-     * You can find all the information about how to use Octokit here:
-     * https://octokit.github.io/rest.js/v18
-     **/
     const octokit = new github.getOctokit(token);
 
-    core.setOutput("time", time);
-    // Get the JSON webhook payload for the event that triggered the workflow
-    const payload = JSON.stringify(github.context.payload, undefined, 2)
-    //console.log(`The event payload: ${payload}`);
-
-    const apiUrl = 'https://restful-booker.herokuapp.com/booking/1';
-
-    // Make a GET request
-    await fetch(apiUrl).then(async response => {
+    await fetch(validationUrl).then(async response => {
       if (!response.ok) {
         console.error('Network response was not ok');
         octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
@@ -39,11 +36,14 @@ const main = async () => {
         });
       } 
       else {
-        let jsonResponse = await response.json();
-        let text = JSON.stringify(jsonResponse);
-        console.log(`Pull Request created. API response: `);
+        let apiResponseJson = await response.json();
+
+        const quantumResistant = await isQuantumResistant(apiResponseJson);
+        let details = await getQuantumResistantDetails(quantumResistant, JSON.stringify(apiResponseJson));
+        details = JSON.stringify(details);
+
         octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
-          body: `Pull Request #${pr_number} created. API response: ${text}`
+          body: `Pull Request #${pr_number} created. API response: ${details}`
         });
       }
     })
