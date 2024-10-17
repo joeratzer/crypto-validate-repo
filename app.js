@@ -16,41 +16,45 @@ const isQuantumResistant = (apiResponseJson) => {
   return !apiResponseJson.find(r => r.resistant === false);
 }
 
-const main = async () => {
+const processApiResponse = async (response, owner, repo, prNumber) => {
+  if (!response.ok) {
+    const apiFailedText = 'API call failed';
+    octokit.rest.issues.createComment({owner, repo, issue_number: prNumber, prNumber,
+      body: `Pull Request #${prNumber} created. ${apiFailedText}`
+    });
+    core.setFailed(apiFailedText);
+  } 
+  else {
+    let apiResponseJson = await response.json();
 
+    const quantumResistant = isQuantumResistant(apiResponseJson);
+    const details = getQuantumResistantDetails(quantumResistant, JSON.stringify(apiResponseJson));
+    const fullResponse = JSON.stringify(details);
+
+    octokit.rest.issues.createComment({owner, repo, issue_number: prNumber,
+      body: `Pull Request #${prNumber} created. API response: ${fullResponse}`
+    });
+  }
+}
+
+const main = async () => {
   try {
     
     const owner = core.getInput('owner', { required: true });
     const repo = core.getInput('repo', { required: true });
-    const pr_number = core.getInput('pr_number', { required: true });
+    const prNumber = core.getInput('pr_number', { required: true });
     const token = core.getInput('token', { required: true });
     const validationUrl = core.getInput('validationUrl', { required: true });
 
     const octokit = new github.getOctokit(token);
 
     await fetch(validationUrl).then(async response => {
-      if (!response.ok) {
-        console.error(`API call (${validationUrl}) is not successfull`);
-        octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
-          body: `Pull Request #${pr_number} created. But API call failed`
-        });
-      } 
-      else {
-        let apiResponseJson = await response.json();
-
-        const quantumResistant = isQuantumResistant(apiResponseJson);
-        const details = getQuantumResistantDetails(quantumResistant, JSON.stringify(apiResponseJson));
-        const fullResponse = JSON.stringify(details);
-
-        octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
-          body: `Pull Request #${pr_number} created. API response: ${fullResponse}`
-        });
-      }
+      await processApiResponse(response, owner, repo, prNumber);
     })
     .catch(error => {
-      console.error('Error:', error);
-      octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
-        body: `Pull Request #${pr_number} created. But API call failed (${validationUrl}). Error: ${error}`
+      core.setFailed(error.message);
+      octokit.rest.issues.createComment({owner, repo, issue_number: prNumber,
+        body: `Pull Request #${prNumber} created. But API call failed (${validationUrl}). Error: ${error}`
       });
     });
     

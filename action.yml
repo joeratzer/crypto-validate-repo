@@ -1,5 +1,5 @@
-name: 'Call a JS file'
-description: 'Call a JS file from a GitHub Action'
+name: 'Validate a repo'
+description: 'Call a validation API from a GitHub Action'
 inputs:
   owner:
     description: 'The owner of the repository'
