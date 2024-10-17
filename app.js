@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
-const getQuantumResistantDetails = async (isQuantumResistant, result) => {
+const getQuantumResistantDetails = (isQuantumResistant, result) => {
   return {
     isQuantumResistant: isQuantumResistant,
     details: result,
@@ -9,7 +9,7 @@ const getQuantumResistantDetails = async (isQuantumResistant, result) => {
   }
 }
 
-const isQuantumResistant = async (apiResponseJson) => {
+const isQuantumResistant = (apiResponseJson) => {
   if (!apiResponseJson)
     return false;
 
@@ -30,7 +30,7 @@ const main = async () => {
 
     await fetch(validationUrl).then(async response => {
       if (!response.ok) {
-        console.error('Network response was not ok');
+        console.error(`API call (${validationUrl}) is not successfull`);
         octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
           body: `Pull Request #${pr_number} created. But API call failed`
         });
@@ -38,19 +38,19 @@ const main = async () => {
       else {
         let apiResponseJson = await response.json();
 
-        const quantumResistant = await isQuantumResistant(apiResponseJson);
-        let details = await getQuantumResistantDetails(quantumResistant, JSON.stringify(apiResponseJson));
-        details = JSON.stringify(details);
+        const quantumResistant = isQuantumResistant(apiResponseJson);
+        let details = getQuantumResistantDetails(quantumResistant, JSON.stringify(apiResponseJson));
+        let response = JSON.stringify(details);
 
         octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
-          body: `Pull Request #${pr_number} created. API response: ${details}`
+          body: `Pull Request #${pr_number} created. API response: ${response}`
         });
       }
     })
     .catch(error => {
       console.error('Error:', error);
       octokit.rest.issues.createComment({owner, repo, issue_number: pr_number,
-        body: `Pull Request #${pr_number} created. But API call failed`
+        body: `Pull Request #${pr_number} created. But API call failed (${validationUrl}). Error: ${error}`
       });
     });
     
