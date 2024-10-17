@@ -1,6 +1,8 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
+const testBody = '{"firstname" : "Jim","lastname" : "Smith", "totalprice" : 111,"depositpaid" : true,"bookingdates" : {"checkin" : "2018-01-01", "checkout" : "2019-01-01" },"additionalneeds" : "Breakfast"}';
+
 const getQuantumResistantDetails = (isQuantumResistant, result) => {
 
   return {
@@ -52,9 +54,9 @@ const main = async () => {
     const octokit = new github.getOctokit(token);
 
     const requestOptions = {
-      method: 'GET',
+      method: 'POST',
       headers: { 'Content-Type' : 'application/json' },
-      body: ''
+      body: testBody
     };
 
     await fetch(validationUrl, requestOptions).then(async response => {
