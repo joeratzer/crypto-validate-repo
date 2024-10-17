@@ -25,7 +25,7 @@ const processApiResponse = async (response, owner, repo, prNumber) => {
     core.setFailed(apiFailedText);
   } 
   else {
-    let apiResponseJson = await response.json();
+    const apiResponseJson = await response.json();
 
     const quantumResistant = isQuantumResistant(apiResponseJson);
     const details = getQuantumResistantDetails(quantumResistant, JSON.stringify(apiResponseJson));
